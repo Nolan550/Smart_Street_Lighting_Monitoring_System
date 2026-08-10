@@ -104,7 +104,7 @@ function Dashboard() {
           </div>
 
           <p className="db-kpi-label">
-            Active Lights
+            Lights ON
           </p>
 
           <h2 className="db-kpi-value">
@@ -121,7 +121,7 @@ function Dashboard() {
           </div>
 
           <p className="db-kpi-label">
-            Offline Lights
+            Lights OFF
           </p>
 
           <h2 className="db-kpi-value">

@@ -1,15 +1,19 @@
 // frontend/src/components/ZoneControl.jsx
 import { useState } from "react";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import "./ZoneControl.css";
 
-function ZoneControl({ zone, onUpdate }) {
+function ZoneControl({ zone, onUpdate, canDelete, onDelete }) {
   const [brightness, setBrightness] = useState(
     Math.round(zone.avg_brightness) || 0
   );
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  const { user } = useAuth();
+  const canControl = user?.role === "Maintenance Engineer";
 
   const isOn = parseInt(zone.active_lights) > 0;
 
@@ -56,6 +60,23 @@ function ZoneControl({ zone, onUpdate }) {
           </p>
         </div>
         <span className={`zc-status-dot ${isOn ? "zc-dot-on" : "zc-dot-off"}`}></span>
+        {canDelete && (
+          <button
+            onClick={onDelete}
+            title="Delete zone"
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#dc2626",
+              fontSize: "13px",
+              cursor: "pointer",
+              marginLeft: "8px",
+              padding: "4px 6px",
+            }}
+          >
+            🗑 Delete
+          </button>
+        )}
       </div>
 
       {/* Brightness Slider */}
@@ -70,26 +91,32 @@ function ZoneControl({ zone, onUpdate }) {
         value={brightness}
         onChange={(e) => setBrightness(Number(e.target.value))}
         className="zc-slider"
-        disabled={!isOn}
+        disabled={!isOn || !canControl}
       />
 
-      {/* Action Buttons */}
-      <div className="zc-btn-row">
-        <button
-          className={`zc-btn zc-btn-toggle ${isOn ? "zc-btn-off" : "zc-btn-on"}`}
-          onClick={handleToggle}
-          disabled={toggling}
-        >
-          {toggling ? "..." : isOn ? "⏻  Turn OFF" : "⏻  Turn ON"}
-        </button>
-        <button
-          className="zc-btn zc-btn-save"
-          onClick={handleSave}
-          disabled={saving || !isOn}
-        >
-          {saving ? "Saving..." : "Save"}
-        </button>
-      </div>
+      {/* Action Buttons — only Maintenance Engineers get controls */}
+      {canControl ? (
+        <div className="zc-btn-row">
+          <button
+            className={`zc-btn zc-btn-toggle ${isOn ? "zc-btn-off" : "zc-btn-on"}`}
+            onClick={handleToggle}
+            disabled={toggling}
+          >
+            {toggling ? "..." : isOn ? "⏻  Turn OFF" : "⏻  Turn ON"}
+          </button>
+          <button
+            className="zc-btn zc-btn-save"
+            onClick={handleSave}
+            disabled={saving || !isOn}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      ) : (
+        <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "10px", marginBottom: 0 }}>
+          Only Maintenance Engineers can control zones.
+        </p>
+      )}
 
       {/* Last Updated */}
       <p className="zc-last-updated">

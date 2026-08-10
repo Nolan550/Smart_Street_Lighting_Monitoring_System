@@ -1,4 +1,3 @@
-
 const pool = require("../config/db");
 
 const getDashboardStats = async (req, res) => {
@@ -24,11 +23,16 @@ const getDashboardStats = async (req, res) => {
         WHERE LOWER(status)='offline'
       `);
 
+    // FIX: "faulty" is not a streetlights.status value (that column is
+    // only ever 'Online'/'Offline'). A light is faulty when it has an
+    // OPEN fault against it, so count distinct lights from the faults
+    // table instead — matching what the Faults page itself considers
+    // "active".
     const faultyLightsResult =
       await pool.query(`
-        SELECT COUNT(*) AS faulty
-        FROM streetlights
-        WHERE LOWER(status)='faulty'
+        SELECT COUNT(DISTINCT light_id) AS faulty
+        FROM faults
+        WHERE status = 'Open'
       `);
 
     const energyResult =
@@ -129,10 +133,13 @@ const getDashboardStats = async (req, res) => {
   });
   }
 };
+
 const getRecentAlerts = async (req,res)=>{
 
   try{
 
+    // FIX: only show OPEN faults — resolved ones were showing up here
+    // forever since there was no status filter at all before.
     const result =
       await pool.query(`
         SELECT
@@ -141,6 +148,7 @@ const getRecentAlerts = async (req,res)=>{
           fault_type,
           reported_at
         FROM faults
+        WHERE status = 'Open'
         ORDER BY reported_at DESC
         LIMIT 5
       `);

@@ -3,17 +3,27 @@ const express = require("express");
 const router = express.Router();
 const {
   getAllZones,
+  createZone,
   updateZoneBrightness,
   toggleZone,
+  deleteZone,
 } = require("../controllers/zoneController");
 
-// GET /api/zones
-router.get("/", getAllZones);
+const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
-// PUT /api/zones/:id/brightness
-router.put("/:id/brightness", updateZoneBrightness);
+// GET /api/zones — any logged-in user can view
+router.get("/", requireAuth, getAllZones);
 
-// PUT /api/zones/:id/toggle
-router.put("/:id/toggle", toggleZone);
+// POST /api/zones — Administrator only
+router.post("/", requireAuth, requireRole("Administrator"), createZone);
+
+// PUT /api/zones/:id/brightness — Maintenance Engineer only
+router.put("/:id/brightness", requireAuth, requireRole("Maintenance Engineer"), updateZoneBrightness);
+
+// PUT /api/zones/:id/toggle — Maintenance Engineer only
+router.put("/:id/toggle", requireAuth, requireRole("Maintenance Engineer"), toggleZone);
+
+// DELETE /api/zones/:id — Administrator only
+router.delete("/:id", requireAuth, requireRole("Administrator"), deleteZone);
 
 module.exports = router;

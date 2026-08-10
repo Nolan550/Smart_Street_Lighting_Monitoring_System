@@ -231,3 +231,51 @@
   color: #9ca3af;
   margin: 0;
 }
+
+/* User bar (name + logout) in header */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.db-user-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.db-user-info {
+  text-align: right;
+}
+
+.db-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.db-user-role {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 2px 0 0 0;
+}
+
+.db-logout-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.db-logout-btn:hover {
+  background: #e5e7eb;
+}

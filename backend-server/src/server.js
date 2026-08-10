@@ -12,6 +12,10 @@ const motionRoutes = require('./routes/motion');
 const reportRoutes = require('./routes/reports');
 const zonesRoutes = require('./routes/zones');
 const scheduleRoutes = require("./routes/schedule");
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+
 
 // In server.js — add this line so MQTT starts with the server
 require('./mqtt/mqttClient');
@@ -32,6 +36,9 @@ app.use('/api/schedule', scheduleRoutes);
 app.get('/', (req, res) => {
     res.send('Smart Street Lighting Backend Running');
 });
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
 
 // Database test route
 app.get('/test-db', async (req, res) => {

@@ -6,8 +6,12 @@ const {
     generateReport
 } = require('../controllers/reportController');
 
-router.get('/', getReports);
+const { requireAuth, requireRole } = require('../middleware/authMiddleware');
 
-router.post('/generate', generateReport);
+// Any logged-in user can view reports
+router.get('/', requireAuth, getReports);
+
+// Only Administrators can generate new reports
+router.post('/generate', requireAuth, requireRole('Administrator'), generateReport);
 
 module.exports = router;

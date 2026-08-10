@@ -5,14 +5,16 @@ const getReports = async (req, res) => {
 
         const result = await pool.query(`
             SELECT
-                report_id,
-                report_month,
-                before_consumption,
-                after_consumption,
-                savings_percentage,
-                generated_by
-            FROM energyreports
-            ORDER BY report_month DESC
+                er.report_id,
+                er.report_month,
+                er.before_consumption,
+                er.after_consumption,
+                er.savings_percentage,
+                er.generated_by,
+                u.full_name AS generated_by_name
+            FROM energyreports er
+            LEFT JOIN users u ON er.generated_by = u.user_id
+            ORDER BY er.report_month DESC
         `);
 
         res.json(result.rows);
@@ -31,7 +33,9 @@ const generateReport = async (req, res) => {
 
     try {
 
-        const generatedBy = 1;
+        // Was hardcoded to 1 — now uses whoever is actually logged in,
+        // set by requireAuth middleware.
+        const generatedBy = req.user.user_id;
 
         const energyResult = await pool.query(`
             SELECT

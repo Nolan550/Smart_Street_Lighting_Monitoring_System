@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
+const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
 /**
  * GET all schedules with zone name
+ * Any logged-in user can view.
  */
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT s.*, z.zone_name
@@ -23,8 +25,9 @@ router.get("/", async (req, res) => {
 
 /**
  * POST new schedule (with duplicate prevention)
+ * Maintenance Engineer only.
  */
-router.post("/", async (req, res) => {
+router.post("/", requireAuth, requireRole("Maintenance Engineer"), async (req, res) => {
   const { zone_id, start_time, end_time, brightness_level } = req.body;
 
   try {
@@ -65,8 +68,9 @@ router.post("/", async (req, res) => {
 
 /**
  * UPDATE schedule (brightness/time changes)
+ * Maintenance Engineer only.
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAuth, requireRole("Maintenance Engineer"), async (req, res) => {
   const { id } = req.params;
   const { start_time, end_time, brightness_level } = req.body;
 
@@ -97,8 +101,9 @@ router.put("/:id", async (req, res) => {
 
 /**
  * DELETE schedule
+ * Maintenance Engineer only.
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAuth, requireRole("Maintenance Engineer"), async (req, res) => {
   const { id } = req.params;
 
   try {

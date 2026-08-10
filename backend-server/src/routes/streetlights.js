@@ -2,9 +2,15 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    getAllStreetLights
+    getAllStreetLights,
+    createStreetLight,
+    deleteStreetLight
 } = require('../controllers/streetlightController');
 
-router.get('/', getAllStreetLights);
+const { requireAuth, requireRole } = require('../middleware/authMiddleware');
+
+router.get('/', requireAuth, getAllStreetLights);
+router.post('/', requireAuth, requireRole('Infrastructure Engineer'), createStreetLight);
+router.delete('/:id', requireAuth, requireRole('Infrastructure Engineer'), deleteStreetLight);
 
 module.exports = router;

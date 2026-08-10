@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import MainLayout from "../layouts/MainLayout";
+import { useAuth } from "../context/AuthContext";
 import "./Scheduling.css";
 
 function Scheduling() {
@@ -9,6 +10,9 @@ function Scheduling() {
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
   const [localSchedules, setLocalSchedules] = useState([]);
+
+  const { user } = useAuth();
+  const canManage = user?.role === "Maintenance Engineer";
 
   // New schedule form state
   const [form, setForm] = useState({
@@ -118,7 +122,7 @@ function Scheduling() {
       alert("Schedule added!");
     } catch (err) {
       console.error(err);
-      alert("Failed to add schedule.");
+      alert(err.response?.data?.error || "Failed to add schedule.");
     }
   };
 
@@ -139,7 +143,9 @@ function Scheduling() {
       <div className="sch-header">
         <h1 className="sch-title">Scheduling</h1>
         <p className="sch-subtitle">
-          Set automatic brightness schedules for your street lights
+          {canManage
+            ? "Set automatic brightness schedules for your street lights"
+            : "View automatic brightness schedules for your street lights"}
         </p>
       </div>
 
@@ -157,14 +163,16 @@ function Scheduling() {
                   <th>End Time</th>
                   <th>Brightness</th>
                   <th>Preview</th>
-                  <th>Actions</th>
+                  {canManage && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {localSchedules.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="sch-empty">
-                      No schedules found. Add one using the form →
+                    <td colSpan={canManage ? 6 : 5} className="sch-empty">
+                      {canManage
+                        ? "No schedules found. Add one using the form →"
+                        : "No schedules found."}
                     </td>
                   </tr>
                 ) : (
@@ -182,19 +190,27 @@ function Scheduling() {
                         </span>
                       </td>
                       <td className="sch-slider-cell">
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={s.brightness_level}
-                          onChange={(e) =>
-                            handleLocalBrightness(s.schedule_id, e.target.value)
-                          }
-                          className="sch-slider"
-                        />
-                        <span className="sch-bright-pct">
-                          {s.brightness_level}%
-                        </span>
+                        {canManage ? (
+                          <>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={s.brightness_level}
+                              onChange={(e) =>
+                                handleLocalBrightness(s.schedule_id, e.target.value)
+                              }
+                              className="sch-slider"
+                            />
+                            <span className="sch-bright-pct">
+                              {s.brightness_level}%
+                            </span>
+                          </>
+                        ) : (
+                          <span className="sch-bright-pct">
+                            {s.brightness_level}%
+                          </span>
+                        )}
                       </td>
                       <td>
                         <div
@@ -206,22 +222,24 @@ function Scheduling() {
                           }}
                         />
                       </td>
-                      <td>
-                        <button
-                          className="sch-delete-btn"
-                          onClick={() => handleDelete(s.schedule_id)}
-                          title="Delete schedule"
-                        >
-                          🗑
-                        </button>
-                      </td>
+                      {canManage && (
+                        <td>
+                          <button
+                            className="sch-delete-btn"
+                            onClick={() => handleDelete(s.schedule_id)}
+                            title="Delete schedule"
+                          >
+                            🗑
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
 
-            {localSchedules.length > 0 && (
+            {canManage && localSchedules.length > 0 && (
               <div className="sch-save-row">
                 <button
                   className="sch-save-btn"
@@ -249,89 +267,91 @@ function Scheduling() {
           </div>
         </div>
 
-        {/* ── RIGHT: Add New Schedule form ── */}
-        <div className="sch-sidebar">
-          <div className="sch-card">
-            <h3 className="sch-card-title">Add New Schedule</h3>
+        {/* ── RIGHT: Add New Schedule form — Maintenance Engineer only ── */}
+        {canManage && (
+          <div className="sch-sidebar">
+            <div className="sch-card">
+              <h3 className="sch-card-title">Add New Schedule</h3>
 
-            {/* Zone select */}
-            <label className="sch-label">Zone</label>
-            <select
-              className="sch-input"
-              value={form.zone_id}
-              onChange={(e) => setForm({ ...form, zone_id: e.target.value })}
-            >
-              {zones.map((z) => (
-                <option key={z.zone_id} value={z.zone_id}>
-                  {z.zone_name}
-                </option>
-              ))}
-            </select>
+              {/* Zone select */}
+              <label className="sch-label">Zone</label>
+              <select
+                className="sch-input"
+                value={form.zone_id}
+                onChange={(e) => setForm({ ...form, zone_id: e.target.value })}
+              >
+                {zones.map((z) => (
+                  <option key={z.zone_id} value={z.zone_id}>
+                    {z.zone_name}
+                  </option>
+                ))}
+              </select>
 
-            {/* Start time */}
-            <label className="sch-label">Start Time</label>
-            <input
-              type="time"
-              className="sch-input"
-              value={form.start_time}
-              onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-            />
-
-            {/* End time */}
-            <label className="sch-label">End Time</label>
-            <input
-              type="time"
-              className="sch-input"
-              value={form.end_time}
-              onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-            />
-
-            {/* Brightness slider */}
-            <label className="sch-label">
-              Brightness: {form.brightness_level}%
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={form.brightness_level}
-              onChange={(e) =>
-                setForm({ ...form, brightness_level: parseInt(e.target.value) })
-              }
-              className="sch-slider"
-            />
-
-            {/* Preview */}
-            <label className="sch-label">Preview</label>
-            <div className="sch-preview-row">
-              <div
-                className="sch-preview-box-lg"
-                style={{
-                  backgroundColor: brightnessToColor(form.brightness_level),
-                }}
+              {/* Start time */}
+              <label className="sch-label">Start Time</label>
+              <input
+                type="time"
+                className="sch-input"
+                value={form.start_time}
+                onChange={(e) => setForm({ ...form, start_time: e.target.value })}
               />
-              <p className="sch-preview-text">
-                From {formatTime(form.start_time)} to{" "}
-                {formatTime(form.end_time)}, lights will be at{" "}
-                {form.brightness_level}% brightness
-              </p>
+
+              {/* End time */}
+              <label className="sch-label">End Time</label>
+              <input
+                type="time"
+                className="sch-input"
+                value={form.end_time}
+                onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+              />
+
+              {/* Brightness slider */}
+              <label className="sch-label">
+                Brightness: {form.brightness_level}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={form.brightness_level}
+                onChange={(e) =>
+                  setForm({ ...form, brightness_level: parseInt(e.target.value) })
+                }
+                className="sch-slider"
+              />
+
+              {/* Preview */}
+              <label className="sch-label">Preview</label>
+              <div className="sch-preview-row">
+                <div
+                  className="sch-preview-box-lg"
+                  style={{
+                    backgroundColor: brightnessToColor(form.brightness_level),
+                  }}
+                />
+                <p className="sch-preview-text">
+                  From {formatTime(form.start_time)} to{" "}
+                  {formatTime(form.end_time)}, lights will be at{" "}
+                  {form.brightness_level}% brightness
+                </p>
+              </div>
+
+              <button className="sch-add-btn" onClick={handleAddSchedule}>
+                + Add Schedule
+              </button>
             </div>
 
-            <button className="sch-add-btn" onClick={handleAddSchedule}>
-              + Add Schedule
-            </button>
+            {/* Schedule Info */}
+            <div className="sch-info-card">
+              <strong>Schedule Info</strong>
+              <p>
+                Schedules automatically adjust street light brightness based on
+                the time of day. The system will smoothly transition between
+                scheduled brightness levels.
+              </p>
+            </div>
           </div>
-
-          {/* Schedule Info */}
-          <div className="sch-info-card">
-            <strong>Schedule Info</strong>
-            <p>
-              Schedules automatically adjust street light brightness based on
-              the time of day. The system will smoothly transition between
-              scheduled brightness levels.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </MainLayout>
   );
