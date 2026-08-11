@@ -4,7 +4,6 @@ A full-stack IoT platform for monitoring and controlling street lighting infrast
 
 The system combines ESP32-based lighting nodes, an MQTT messaging layer, a Node.js/Express API, a PostgreSQL database, and a React dashboard to give infrastructure engineers real-time visibility and control over street lights and their energy consumption.
 
----
 
 ## Features
 
@@ -18,7 +17,6 @@ The system combines ESP32-based lighting nodes, an MQTT messaging layer, a Node.
 - **MQTT-based device communication** — ESP32 nodes publish/subscribe via a Mosquitto broker
 - **Independent node connectivity** — each ESP32 node connects directly over WiFi/MQTT (no inter-node ESP-NOW dependency), improving reliability
 
----
 
 ## Architecture
 
@@ -42,7 +40,6 @@ The system combines ESP32-based lighting nodes, an MQTT messaging layer, a Node.
 
 Each ESP32 node connects independently to WiFi and communicates with the backend through the MQTT broker. The backend subscribes to node topics, persists data to PostgreSQL, and exposes a REST API consumed by the React dashboard.
 
----
 
 ## Tech Stack
 
@@ -55,7 +52,6 @@ Each ESP32 node connects independently to WiFi and communicates with the backend
 | Frontend | React |
 | Auth | JWT, RBAC (3 roles) |
 
----
 
 ## Repository Structure
 
@@ -67,8 +63,6 @@ Smart_Street_Lighting_Monitoring_System/
 ├── mqtt/              # Mosquitto broker configuration
 └── .gitignore
 ```
-
----
 
 ## Getting Started
 
@@ -136,7 +130,6 @@ The dashboard should now be available at `http://localhost:3000`.
 
 Open the `Hardware/` folder in PlatformIO or Arduino IDE, update the WiFi credentials and MQTT broker address, then flash each node.
 
----
 
 ## User Roles
 
@@ -146,19 +139,16 @@ Open the `Hardware/` folder in PlatformIO or Arduino IDE, update the WiFi creden
 | Infrastructure Engineer | Configure zones/nodes, control lighting |
 | Maintenance Engineer | View status, monitor energy, report faults |
 
----
 
 ## Energy Monitoring
 
 Energy data is collected from PZEM-004T sensors on each node, filtered for sane readings, and stored with the raw timestamp. The API aggregates this data using PostgreSQL's `date_trunc()` function to provide hourly, daily, and monthly consumption views on the dashboard.
 
----
 
 ## Project Team
 
 Group 13, CN286 — Ardhi University (ARU), Dar es Salaam, Tanzania.
 
----
 
 ## License
 
