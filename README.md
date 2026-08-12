@@ -4,6 +4,8 @@ A full-stack IoT platform for monitoring and controlling street lighting infrast
 
 The system combines ESP32-based lighting nodes, an MQTT messaging layer, a Node.js/Express API, a PostgreSQL database, and a React dashboard to give infrastructure engineers real-time visibility and control over street lights and their energy consumption.
 
+![Smart Street Lighting Dashboard](docs/screenshots/dashboard.png)
+
 
 ## Features
 
