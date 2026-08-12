@@ -21,21 +21,23 @@ The system combines ESP32-based lighting nodes, an MQTT messaging layer, a Node.
 ## Architecture
 
 ```
-┌─────────────┐      MQTT       ┌──────────────────┐      HTTP/REST      ┌─────────────┐
-│  ESP32 Node │ ◄─────────────► │  Mosquitto Broker │ ◄──────────────────► │   Backend   │
-│  (x3, WiFi) │                 │                    │                     │  Node/Express│
-└─────────────┘                 └──────────────────┘                      └──────┬──────┘
-      │                                                                          │
-      │ PZEM-004T                                                               ▼
-      │ energy readings                                                  ┌─────────────┐
-      ▼                                                                  │ PostgreSQL  │
-  Street light                                                           └─────────────┘
-  hardware                                                                       │
-                                                                                  ▼
-                                                                          ┌─────────────┐
-                                                                          │React Frontend│
-                                                                          │  Dashboard   │
-                                                                          └─────────────┘
+┌──────────────────┐         MQTT        ┌──────────────────┐        HTTP/REST        ┌──────────────────┐
+│    ESP32 Node    │ ◄─────────────────► │ Mosquitto Broker │ ◄─────────────────────► │   Backend API    │
+│    (x3, WiFi)    │                     │                  │                         │  (Node/Express)  │
+└──────────────────┘                     └──────────────────┘                         └──────────────────┘
+          │                                                                                     │
+          │ PZEM-004T                                                                           │
+          │ energy readings                                                                    ▼
+          ▼                                                                           ┌──────────────────┐
+┌──────────────────┐                                                                  │    PostgreSQL    │
+│   Street Light   │                                                                  │     Database     │
+│     Hardware     │                                                                  └──────────────────┘
+└──────────────────┘                                                                                   │
+                                                                                                ▼
+                                                                                      ┌──────────────────┐
+                                                                                      │  React Frontend  │
+                                                                                      │    Dashboard     │
+                                                                                      └──────────────────┘
 ```
 
 Each ESP32 node connects independently to WiFi and communicates with the backend through the MQTT broker. The backend subscribes to node topics, persists data to PostgreSQL, and exposes a REST API consumed by the React dashboard.
